@@ -18,7 +18,7 @@ for i=1:frameNumber
         accumulativeDifference(i).histogram = imhist(sumFrame);
         figure(1); imshow(accumulativeDifference(i).image); title(['frame= ', num2str(i)]);
         [counts, x] = imhist(accumulativeDifference(i).image);
-        figure(2); bar(x,counts);
+        figure(2); semilogy(x,counts);
     end
 end
 end
