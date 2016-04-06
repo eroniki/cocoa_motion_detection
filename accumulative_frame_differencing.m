@@ -1,20 +1,24 @@
 function accumulativeDifference = accumulative_frame_differencing(frameSequence, p)
 % TODO: Add explicit explanations here
 frameNumber = numel(frameSequence);
-
+accumulativeDifference = struct([]);
 for i=1:frameNumber
-    if(i<p || i>frameNumber-p)
-        accumulativeDifference(i).image = zeros(size(frameSequence(i).image));
+    accumulativeDifference(i).image = zeros(size(frameSequence(i).image_gray));
+    accumulativeDifference(i).histogram = zeros(1,256);
+    if(i<p || i>(frameNumber-p))
         continue;
     else
-        sum = zeros(size(frameSequence(i).image));
-        for counter=-p:p
-            sum = sum + double(frameSequence(i+p).image);
+        sumFrame = zeros(size(frameSequence(i).image_gray));
+        for counter=-p+1:p
+            diff = abs(frameSequence(i).image_gray - frameSequence(i+counter).image_gray);
+%             imshow(diff);
+            sumFrame = sumFrame + im2double(diff);
         end
-        accumulativeFrameDifference(i).image = uint8(sum);
+        accumulativeDifference(i).image = log(sumFrame);
+        accumulativeDifference(i).histogram = imhist(sumFrame);
+        figure(1); imshow(accumulativeDifference(i).image); title(['frame= ', num2str(i)]);
+        [counts, x] = imhist(accumulativeDifference(i).image);
+        figure(2); bar(x,counts);
     end
 end
-
-
 end
-
