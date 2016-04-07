@@ -7,7 +7,7 @@ videoName ='/home/murat/opencv/samples/data/768x576.avi';
 p = 5;
 %% Init
 disp('Start Initialization');
-frameSequence = init_motion_detection(folderName, 0);
+frameSequence = init_motion_detection(videoName, 1);
 disp('Finish Initialization');
 %% Accumulative Frame Differencing
 disp('Start AFD');
