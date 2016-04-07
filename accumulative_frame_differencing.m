@@ -19,6 +19,7 @@ for i=1:frameNumber
         figure(1); imshow(accumulativeDifference(i).image); title(['frame= ', num2str(i)]);
         [counts, x] = imhist(accumulativeDifference(i).image);
         figure(2); semilogy(x,counts);
+        figure(3); imhist(accumulativeDifference(i).image);
     end
 end
 end
