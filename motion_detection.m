@@ -14,4 +14,7 @@ disp('Start AFD');
 accumulativeFrameDifference = accumulative_frame_differencing(frameSequence,p);
 disp('Finish AFD');
 %% Background Modelling
-background = backgroundModelling(frameSequence);
+% background = backgroundModelling(frameSequence);
+for i=1:numel(accumulativeFrameDifference)
+   imshow(gmm_color_cluster(frameSequence(i).image_rgb)) 
+end
