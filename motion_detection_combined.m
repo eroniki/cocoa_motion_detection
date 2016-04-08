@@ -1,5 +1,9 @@
 function [foreground] = motion_detection_combined(frameSequence, p)
 % TODO: Add explicit explanations here
+% 0.2989 * R + 0.5870 * G + 0.1140 * B 
+coefficient.R = 0.2989;
+coefficient.G = 0.5870;
+coefficient.B = 0.1140;
 %% initialize
 frameNumber = numel(frameSequence);
 foreground = struct([]);
@@ -36,7 +40,7 @@ for i=1:frameNumber
 
     gmfit = fitgmdist(tt, k,'CovarianceType', 'diagonal', 'SharedCovariance', ...
             false, 'Options', options);
-
+    assignin('base', 'gmfit', gmfit)
     clusterX = cluster(gmfit,tt);
     clustered = reshape(clusterX,[y,x]);
     [~, minIdx] = min(gmfit.ComponentProportion);
@@ -45,9 +49,9 @@ for i=1:frameNumber
     disp('Finish Color-Based Background Subtraction');
     %% Gradient-based Background Subtraction
     % TODO: Implement this method
-    disp('Start Gradient-Based Background Subtraction');
+%     disp('Start Gradient-Based Background Subtraction');
 
-    disp('Finish Gradient-Based Background Subtraction');
+%     disp('Finish Gradient-Based Background Subtraction');
     
     %% Visualization of the Results
     figure(1);
@@ -55,7 +59,6 @@ for i=1:frameNumber
     subplot(2,2,2); imshow(foreground(i).gmm_foreground); title('Color-based BG Subtraction Result');
     subplot(2,2,3); imshow(foreground(i).gmm_foreground .* foreground(i).afd_image); title('Combined Result'); 
     drawnow;
-
 end
 
 end
