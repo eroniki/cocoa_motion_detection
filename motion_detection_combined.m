@@ -35,14 +35,19 @@ for i=1:frameNumber
     clusterX = cluster(gmfit,tt);
     clustered = reshape(clusterX,[y,x]);
     [~, minIdx] = min(gmfit.ComponentProportion);
-    foreground.gmm_foreground = clustered == minIdx;
-    foreground.gmm_percent = sum(foreground.gmm_foreground(:))/numel(foreground.gmm_foreground);
+    foreground.gmm_foreground(i) = clustered == minIdx;
+    foreground.gmm_percent(i) = sum(foreground.gmm_foreground(i,:))/numel(foreground.gmm_foreground(i,:));
     disp('Finish Color-Based Background Subtraction');
     %% Gradient-based Background Subtraction
     % TODO: Implement this method
     disp('Start Gradient-Based Background Subtraction');
 
     disp('Finish Gradient-Based Background Subtraction');
+    
+    %% Visualization of the Results
+    figure(1);
+    subplot(2,1,1); imshow(foreground(i).afd_image);
+    subplot(2,1,2); imshow(foreground.gmm_percent(i));
 
 end
 

@@ -10,4 +10,4 @@ disp('Start Initialization');
 frameSequence = init_motion_detection(videoName, 1);
 disp('Finish Initialization');
 %% Motion Detection
-foreground = accumulative_frame_differencing(frameSequence,p);
+foreground = motion_detection_combined(frameSequence,p);
