@@ -5,6 +5,10 @@ frameNumber = numel(frameSequence);
 foreground = struct([]);
 % loop over the frames
 for i=1:frameNumber
+    % Clear screen
+    clc;
+    info = sprintf('Total Number of Frame: %d, Current Frame Number: %d, (%%) Done: %d', frameNumber, i, int16((i-1)/frameNumber));
+    disp(info);
     %% Accumulative Frame Differencing
     disp('Start AFD');
     foreground(i).afd_image = zeros(size(frameSequence(i).image_gray));
@@ -47,8 +51,10 @@ for i=1:frameNumber
     
     %% Visualization of the Results
     figure(1);
-    subplot(2,1,1); imshow(foreground(i).afd_image);
-    subplot(2,1,2); imshow(foreground(i).gmm_foreground);
+    subplot(2,2,1); imshow(foreground(i).afd_image); title('AFD Result');
+    subplot(2,2,2); imshow(foreground(i).gmm_foreground); title('Color-based BG Subtraction Result');
+    subplot(2,2,3); imshow(foreground(i).gmm_foreground .* foreground(i).afd_image); title('Combined Result'); 
+    drawnow;
 
 end
 
