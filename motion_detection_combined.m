@@ -10,8 +10,9 @@ frameNumber = numel(frameSequence);
 foreground = struct([]);
 % loop over the frames
 for i=1:frameNumber
-    % Clear screen
-    clc;
+%     Clear screen
+%     clc;
+    disp('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
     info = sprintf('Total Number of Frame: %d, Current Frame Number: %d, (%%) Done: %d', frameNumber, i, int16((i-1)/frameNumber));
     disp(info);
     %% Accumulative Frame Differencing
@@ -81,34 +82,35 @@ for i=1:frameNumber
             mu_fy = foreground(i).gradient.mu(row+1,col) ...
                - foreground(i).gradient.mu(row,col);
            
-           variance_fx = foreground(i).gradient.variance(row,col+1)^2 ...
+            variance_fx = foreground(i).gradient.variance(row,col+1)^2 ...
                 + foreground(i).gradient.variance(row,col)^2; 
             
             variance_fy = foreground(i).gradient.variance(row+1,col)^2 ...
                 + foreground(i).gradient.variance(row,col)^2;
             
 %             (Javed et al, 2002) Eq. 8
-            rho = foreground(i).gradient.variance(row,col)^2 / (mu_fx*mu_fy)^0.5;
+            rho = foreground(i).gradient.variance(row,col)^2 / (variance_fx*variance_fy)^0.5;
             
             z = ((Gmag(row, col) * cosGdir(row, col)-mu_fx)/variance_fx)^2 ...
                 -2*rho*((Gmag(row, col) * cosGdir(row, col)-mu_fx)/variance_fx) ...
                 * (Gmag(row, col) * sinGdir(row, col)-mu_fy)/variance_fy ...
                 + ((Gmag(row, col) * sinGdir(row, col)-mu_fy)/variance_fy)^2;
-            
-            distribution(y,x) = Gmag(row, col) / (2*pi*mu_fx*mu_fy*sqrt(1-rho^2)) ...
-                * exp(-1*z/(2*(1-rho^2)));
+
+            distribution(y,x) = Gmag(row, col) * exp(-1*z/(2*(1-rho^2))) ...
+                / (2*pi*variance_fx*variance_fy*sqrt(1-rho^2));
         end
     end
     
-    foreground(i).distribution = distribution;
+    foreground(i).distribution = distribution * 10^21;
+    sum(sum(foreground(i).distribution ~=0))/numel(foreground(i).distribution)
     disp('Finish Gradient-Based Background Subtraction');
-    assignin('base', 'foreground', foreground)
+    assignin('base', 'foreground', foreground);
     %% Visualization of the Results
     figure(1);
     subplot(2,2,1); imshow(foreground(i).afd_image); title('AFD Result');
     subplot(2,2,2); imshow(foreground(i).gmm_foreground); title('Color-based BG Subtraction Result');
     subplot(2,2,3); imshow(foreground(i).gmm_foreground .* foreground(i).afd_image); title('Combined Result'); 
-    subplot(2,2,4); imshow(foreground(i).distribution);
+    subplot(2,2,4); imagesc(foreground(i).distribution);
     drawnow;
 end
 
