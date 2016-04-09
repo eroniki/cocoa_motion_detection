@@ -58,8 +58,9 @@ for i=1:frameNumber
     gray_variance = zeros(1, k);
      
     for t=1:k
+%         (Javed et al, 2002) Eq.2
         gray_mu(t) = gmfit.mu(t,1) * coefficient.R + gmfit.mu(t,2) * coefficient.G + gmfit.mu(t,3) * coefficient.B;
-        gray_variance(t) = coefficient.R^2 * gmfit.Sigma(:,1,t) + coefficient.G^2 * gmfit.Sigma(:,2,t) + coefficient.B^2 * gmfit.Sigma(:,3,t);
+        gray_variance(t) = coefficient.R^2 * gmfit.Sigma(:,1,t)^2 + coefficient.G^2 * gmfit.Sigma(:,2,t)^2 + coefficient.B^2 * gmfit.Sigma(:,3,t)^2;
         foreground(i).gradient.mu(clustered == t) = gray_mu(t);
         foreground(i).gradient.variance(clustered == t) = gray_variance(t);  
     end
@@ -73,20 +74,22 @@ for i=1:frameNumber
     sinGdir = sin(Gdir);
     
     for row=2:y-1
-        for col=2:x-1             
+        for col=2:x-1
+%             (Javed et al, 2002) Eq. 5,6
             mu_fx = foreground(i).gradient.mu(row,col+1) ...
                - foreground(i).gradient.mu(row,col);
             mu_fy = foreground(i).gradient.mu(row+1,col) ...
                - foreground(i).gradient.mu(row,col);
-            
-           rho = foreground(i).gradient.variance(row,col) / (mu_fx*mu_fy)^0.5;
-
-           variance_fx = foreground(i).gradient.variance(row,col+1) ...
-                + foreground(i).gradient.variance(row,col); 
-            
-            variance_fy = foreground(i).gradient.variance(row+1,col) ...
-                + foreground(i).gradient.variance(row,col);
            
+           variance_fx = foreground(i).gradient.variance(row,col+1)^2 ...
+                + foreground(i).gradient.variance(row,col)^2; 
+            
+            variance_fy = foreground(i).gradient.variance(row+1,col)^2 ...
+                + foreground(i).gradient.variance(row,col)^2;
+            
+%             (Javed et al, 2002) Eq. 8
+            rho = foreground(i).gradient.variance(row,col)^2 / (mu_fx*mu_fy)^0.5;
+            
             z = ((Gmag(row, col) * cosGdir(row, col)-mu_fx)/variance_fx)^2 ...
                 -2*rho*((Gmag(row, col) * cosGdir(row, col)-mu_fx)/variance_fx) ...
                 * (Gmag(row, col) * sinGdir(row, col)-mu_fy)/variance_fy ...
@@ -96,6 +99,7 @@ for i=1:frameNumber
                 * exp(-1*z/(2*(1-rho^2)));
         end
     end
+    
     foreground(i).distribution = distribution;
     disp('Finish Gradient-Based Background Subtraction');
     assignin('base', 'foreground', foreground)
