@@ -96,13 +96,14 @@ for i=1:frameNumber
                 * (Gmag(row, col) * sinGdir(row, col)-mu_fy)/variance_fy ...
                 + ((Gmag(row, col) * sinGdir(row, col)-mu_fy)/variance_fy)^2;
 
-            distribution(y,x) = Gmag(row, col) * exp(-1*z/(2*(1-rho^2))) ...
+            distribution(row,col) = Gmag(row, col) * exp(-1*z/(2*(1-rho^2))) ...
                 / (2*pi*variance_fx*variance_fy*sqrt(1-rho^2));
         end
     end
     
-    foreground(i).distribution = distribution * 10^21;
-    sum(sum(foreground(i).distribution ~=0))/numel(foreground(i).distribution)
+    foreground(i).distribution = distribution;
+%     Printing for debug purposes
+    [sum(sum(foreground(i).distribution ~=0)), min(foreground(i).distribution(:)), max(foreground(i).distribution(:))]
     disp('Finish Gradient-Based Background Subtraction');
     assignin('base', 'foreground', foreground);
     %% Visualization of the Results
