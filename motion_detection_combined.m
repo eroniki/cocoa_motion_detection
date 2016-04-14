@@ -113,6 +113,3 @@ for i=1:frameNumber
     subplot(2,2,4); imagesc(foreground(i).distribution);
     drawnow;
 end
-
-end
-
