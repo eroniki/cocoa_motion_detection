@@ -101,9 +101,9 @@ for i=1:frameNumber
         end
     end
     
-    foreground(i).distribution = distribution;
+    foreground(i).distribution = distribution/max(distribution(:));
 %     Printing for debug purposes
-    [sum(sum(foreground(i).distribution ~=0)), min(foreground(i).distribution(:)), max(foreground(i).distribution(:))]
+    vpa([sum(sum(foreground(i).distribution ~=0)), min(foreground(i).distribution(:)), max(foreground(i).distribution(:))])
     disp('Finish Gradient-Based Background Subtraction');
     assignin('base', 'foreground', foreground);
     %% Visualization of the Results
