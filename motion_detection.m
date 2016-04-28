@@ -7,7 +7,7 @@ videoName ='/home/murat/opencv/samples/data/768x576.avi';
 p = 5;
 %% Init
 disp('Start Initialization');
-frameSequence = init_motion_detection(videoName, 1);
+frameSequence = init_motion_detection(folderName, 0);
 disp('Finish Initialization');
 %% Motion Detection
 foreground = motion_detection_combined(frameSequence,p);

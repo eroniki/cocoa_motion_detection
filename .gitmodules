@@ -1,0 +1,4 @@
+[submodule "annotator"]
+	path = annotator
+[submodule "annotator"]
+	url = https://github.com/eroniki/Video-Annotator.git

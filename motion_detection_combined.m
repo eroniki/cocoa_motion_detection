@@ -17,7 +17,7 @@ for i=1:frameNumber
     disp(info);
     %% Accumulative Frame Differencing
     disp('Start AFD');
-    foreground(i).afd_image = zeros(size(frameSequence(i).image_gray));
+    foreground(i).afd_image = zeros(size(frameSequence(i).image_gray), 'uint8');
     foreground(i).histogram = zeros(1,256);
     if(i<p || i>(frameNumber-p))
         continue;
@@ -38,7 +38,7 @@ for i=1:frameNumber
     tt = double(reshape(frameSequence(i).image_rgb,y*x,3));
 
     k = 4;
-    options = statset('MaxIter', 1000, 'Display', 'final'); % Increase number of EM iterations
+    options = statset('MaxIter', 100, 'Display', 'final'); % Increase number of EM iterations
 
     gmfit = fitgmdist(tt, k,'CovarianceType', 'diagonal', 'SharedCovariance', ...
             false, 'Options', options);
@@ -46,8 +46,8 @@ for i=1:frameNumber
     clusterX = cluster(gmfit,tt);
     clustered = reshape(clusterX,[y,x]);
     [~, minIdx] = min(gmfit.ComponentProportion);
-    foreground(i).gmm_foreground = zeros(y, x, 'double');
-    foreground(i).gmm_foreground(clustered == minIdx) = 1;
+    foreground(i).gmm_foreground = zeros(y, x, 'uint8');
+    foreground(i).gmm_foreground(clustered == minIdx) = 255;
     foreground(i).gmm_percent = sum(foreground(i).gmm_foreground(:))/numel(foreground(i).gmm_foreground(:));
     disp('Finish Color-Based Background Subtraction');
     %% Gradient-based Background Subtraction
@@ -74,6 +74,7 @@ for i=1:frameNumber
     cosGdir = cos(Gdir);
     sinGdir = sin(Gdir);
     
+  
     for row=2:y-1
         for col=2:x-1
 %             (Javed et al, 2002) Eq. 5,6
@@ -101,16 +102,15 @@ for i=1:frameNumber
         end
     end
     
-    foreground(i).distribution = distribution/max(distribution(:));
-%     Printing for debug purposes
-    vpa([sum(sum(foreground(i).distribution ~=0)), min(foreground(i).distribution(:)), max(foreground(i).distribution(:))])
+    foreground(i).distribution = uint8(distribution/max(distribution(:))*255);
     disp('Finish Gradient-Based Background Subtraction');
     assignin('base', 'foreground', foreground);
     %% Visualization of the Results
     figure(1);
-    subplot(2,2,1); imshow(foreground(i).afd_image); title('AFD Result');
-    subplot(2,2,2); imshow(foreground(i).gmm_foreground); title('Color-based BG Subtraction Result');
-    subplot(2,2,3); imshow(foreground(i).gmm_foreground .* foreground(i).afd_image); title('Combined Result'); 
-    subplot(2,2,4); imagesc(foreground(i).distribution);
+    subplot(4,2,1); imshow(foreground(i).afd_image); title('AFD Result');
+    subplot(4,2,2); bar([10:256], foreground(i).histogram(10:end)); title('Histogram of log evidence');
+    subplot(4,2,3); imshow(foreground(i).gmm_foreground); title('Color Based BG Subtraction Result');
+    subplot(4,2,5); imshow(foreground(i).distribution); title('Gradient Based BG Model');
+    subplot(4,2,7); imshow(foreground(i).gmm_foreground & foreground(i).distribution & foreground(i).afd_image); title('Combined Result'); 
     drawnow;
 end
