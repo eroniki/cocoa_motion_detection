@@ -4,12 +4,7 @@
 %%% Virginia Tech
 %% Clear everything
 clc; clear all; close all;
-%% Create a video reader object
-% If this line crashes the script, 
-% it is likely to result from a missing G-Streamer plugin or G-Streamer
-% itself; most likely missing plugin: gstreamer0.10-ffmpeg plugin 
-fileName = 'video.mp4';
-fileToRead = [fileName,'.mat'];
+fileToRead = ['../data/DARPA_VIVID/eg_test01/frame.mat'];
 
 load(fileToRead, 'annotation');
 featureSpace.features = [];
@@ -18,7 +13,10 @@ nFrames = numel(annotation.frame);
 for i=1:nFrames
     objectsMarked = numel(annotation.frame(i).targetIndividual);
     for j=1:objectsMarked
-        featureSpace.features = [featureSpace.features; annotation.frame(i).targetIndividual(j).features];
+        featureSize = numel(annotation.frame(i).targetIndividual(j).features);
+        missing = 1540 - featureSize;
+        features = padarray(annotation.frame(i).targetIndividual(j).features, [0 missing], 'post');
+        featureSpace.features = [featureSpace.features; features];
         annotation.frame(i).targetIndividual(j).id;
         featureSpace.id = [featureSpace.id; annotation.frame(i).targetIndividual(j).id];
     end
@@ -28,4 +26,4 @@ mdl = fitcknn(featureSpace.features, featureSpace.id,'NumNeighbors',2,...
     'NSMethod','exhaustive','Distance','minkowski',...
     'Standardize',1);
 
-label = predict(mdl,featureSpace.features) 
+% label = predict(mdl,featureSpace.features) 
