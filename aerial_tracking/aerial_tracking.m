@@ -10,9 +10,9 @@ params.isTrained = true;
 params.datasetLocation = '../data/DARPA_VIVID/eg_test01/egtest01/';
 params.fileName = '';
 params.modelLocation = '';
-params.modelFileName = 'egtest01_model.mat';
+params.modelFileName = 'egtest01_model_2class.mat';
 params.annotationLocation = '';
-params.annotationFileName = 'egtest01_annotation.mat';
+params.annotationFileName = 'egtest01_annotation_2class.mat';
 params.filePrefix = 'frame';
 params.isVideo = false;
 params.annotationToolLocation = '../annotator';
@@ -77,7 +77,7 @@ elseif params.isAnnotated == false
             % provided by the user
             % Concatinate the response
             annotation.frame(k) = annotator(frame);
-            save([params.modelLocation, params.annoationFileName], 'annotation'); 
+            save([params.modelLocation, params.annotationFileName], 'annotation'); 
             k = k + 1;
         end
     end
@@ -236,11 +236,11 @@ for i=startFrame:nframes
         mo_mask(isnan(mo_mask))=0;
         st = regionprops(logical(mo_mask), 'BoundingBox' );
         hold on 
-        for k = 1 : length(st)
-            thisBB = st(k).BoundingBox;
-            rectangle('Position', [thisBB(1),thisBB(2),thisBB(3),thisBB(4)],...
-                'EdgeColor','r','LineWidth',2 )
-        end
+%         for k = 1 : length(st)
+%             thisBB = st(k).BoundingBox;
+%             rectangle('Position', [thisBB(1),thisBB(2),thisBB(3),thisBB(4)],...
+%                 'EdgeColor','r','LineWidth',2 )
+%         end
         
 %%      Murat Ambarkutuk
 % Detection and Classification Routine (Murat Ambarkutuk)
@@ -248,25 +248,25 @@ for i=startFrame:nframes
 % TODO: Background differencing for the static objects (using homography)
 % TODO: 
         for k = 1 : length(st)
-            thisBB = int16(st(k).BoundingBox)
-            rectangle('Position', [thisBB(1),thisBB(2),thisBB(3),thisBB(4)],...
-                'EdgeColor','r','LineWidth',2 );
-            roi = current_frame(thisBB(2):thisBB(2)+thisBB(4), thisBB(1):thisBB(1)+thisBB(3), :);
-            target(k).RGB = imresize(roi, [50, 50]);
-            % Feature representation
-            [target(k).features, target(k).hogVisualization] = extractHOGFeatures(target(k).RGB);
-            disp('hog');
-            size(target(k).features) 
-            surfpoints = detectSURFFeatures(target(k).RGB);
-            surfpoints = surfpoints.selectStrongest(10);
-            [f1, ~] = extractFeatures(target(k).RGB, surfpoints);
-            target(k).features = [target(k).features, f1(:)'];
-            missing = 1540 - numel(target(k).features);
-            target(k).features = padarray(target(k).features, [0 missing], 'post');
-            disp('padded');
-            size(target(k).features)
-            [l, s] = detect_and_classify(mdl, target(k).features)
-            figure(666); imshow(roi);
+            thisBB = int16(st(k).BoundingBox);
+
+            if thisBB(4)~=gs.x & thisBB(3) ~= gs.y
+                rectangle('Position', [thisBB(1),thisBB(2),thisBB(3),thisBB(4)],...
+                    'EdgeColor','r','LineWidth',2 );
+                roi = current_frame(thisBB(2):thisBB(2)+thisBB(4), thisBB(1):thisBB(1)+thisBB(3), :);
+                target(k).RGB = imresize(roi, [50, 50]);
+                % Feature representation
+                [target(k).features, target(k).hogVisualization] = extractHOGFeatures(target(k).RGB);
+                surfpoints = detectSURFFeatures(target(k).RGB);
+                surfpoints = surfpoints.selectStrongest(10);
+                [f1, ~] = extractFeatures(target(k).RGB, surfpoints);
+                target(k).features = [target(k).features, f1(:)'];
+                missing = 1540 - numel(target(k).features);
+                target(k).features = padarray(target(k).features, [0 missing], 'post');
+                [l, s] = detect_and_classify(mdl, target(k).features)
+                figure(666); imshow(roi);
+                pause();
+            end
         end
 
        
