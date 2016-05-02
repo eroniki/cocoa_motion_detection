@@ -39,6 +39,7 @@ if params.isAnnotated == true;
 elseif params.isAnnotated == false
     % Start Annotation Toolbox
     annotation = annotate_data_set(params.isVideo, params.datasetLocation, params.fileName, [params.annotationLocation, params.annotationFileName], params.trainingSkip);
+    annotation = annotate_background(annotation);
     params.isAnnotated = true;
     featureSpace = construct_feature_space(annotation);
     mdl = training_knn(featureSpace, params.numNeighbors, params.searchMethod, params.distanceMetric, params.Standardize, [params.modelLocation, params.modelFileName]);
