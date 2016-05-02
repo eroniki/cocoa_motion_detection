@@ -5,21 +5,24 @@
 %% Initialization
 clear all; close all; clc;
 %% Variables and parameters
-params.isAnnotated = true;
-params.isTrained = true;
+params.isAnnotated = false;
+params.isTrained = false;
 params.datasetLocation = '../data/DARPA_VIVID/eg_test01/egtest01/';
 params.fileName = '';
 params.modelLocation = '';
-params.modelFileName = 'egtest01_model_2class.mat';
+params.modelFileName = 'egtest01_model_2class_true_negative.mat';
 params.annotationLocation = '';
-params.annotationFileName = 'egtest01_annotation_2class.mat';
+params.annotationFileName = 'egtest01_annotation_2class_true_negative.mat';
 params.filePrefix = 'frame';
 params.isVideo = false;
 params.annotationToolLocation = '../annotator';
 params.trainingSkip = 50;
+params.numNeighbors = 10;
+params.searchMethod = 'exhaustive';
+params.distanceMetric = 'minkowski';
+params.Standardize = 1;
 %% Create Path
 addpath(genpath(params.annotationToolLocation));
-
 %% Training Routine
 % Check if the annotation is completed for the dataset
 if params.isAnnotated == true;
@@ -27,89 +30,23 @@ if params.isAnnotated == true;
     if params.isTrained == true
         load([params.modelLocation, params.modelFileName], 'mdl');
     else
+    % Train it and save
         load([params.annotationLocation, params.annotationFileName], 'annotation');
-        featureSpace.features = [];
-        featureSpace.id = [];
-        nFrames = numel(annotation.frame);
-        for i=1:nFrames
-            objectsMarked = numel(annotation.frame(i).targetIndividual);
-            for j=1:objectsMarked
-                featureSize = numel(annotation.frame(i).targetIndividual(j).features);
-                missing = 1540 - featureSize;
-                features = padarray(annotation.frame(i).targetIndividual(j).features, [0 missing], 'post');
-                featureSpace.features = [featureSpace.features; features];
-                annotation.frame(i).targetIndividual(j).id;
-                featureSpace.id = [featureSpace.id; annotation.frame(i).targetIndividual(j).id];
-            end
-        end
-
-        mdl = fitcknn(featureSpace.features, featureSpace.id,'NumNeighbors',2,...
-            'NSMethod','exhaustive','Distance','minkowski',...
-            'Standardize',1);
-        save([params.modelLocation, params.modelFileName], 'mdl');
+        featureSpace = construct_feature_space(annotation);
+        mdl = training_knn(featureSpace, params.numNeighbors, params.searchMethod, params.distanceMetric, params.Standardize, [params.modelLocation, params.modelFileName]);
     end
 % Start annotation routine to create the training model    
 elseif params.isAnnotated == false
-    if params.isVideo==true
-        vidObj = VideoReader([params.dataSetLocation, params.fileName]);
-        frameNum = 1;
-        while hasFrame(vidObj)
-            info = sprintf('Frame Number = %d', num2str(frameNum));
-            disp(info);
-            % Obtain the frame
-            frame = readFrame(vidObj);
-            % Extract HoG features for the frame
-            % Create a new empty frame with the same size of the input frame
-            annotation.frame(frameNum) = annotator(frame);
-            save(params.modelLocation, 'annotation');
-            frameNum = frameNum + 1;        
-        end
-    else
-        imageNames = dir(fullfile(params.datasetLocation,'*.jpg'));
-        imageNames = {imageNames.name}';
-        % Delete ".", ".." and the video file from the list
-        frameNumber = numel(imageNames);
-        k = 1;
-        for frameNum=1:params.trainingSkip:frameNumber
-            % Obtain the frame
-            frame = imread([params.datasetLocation,imageNames{frameNum}]);
-            % Extract features for the frame given the bounding boxes
-            % provided by the user
-            % Concatinate the response
-            annotation.frame(k) = annotator(frame);
-            save([params.modelLocation, params.annotationFileName], 'annotation'); 
-            k = k + 1;
-        end
-    end
-    %%
-    params.isAnnotated == true;
-    featureSpace.features = [];
-    featureSpace.id = [];
-    nFrames = numel(annotation.frame);
-    for i=1:nFrames
-        objectsMarked = numel(annotation.frame(i).targetIndividual);
-        for j=1:objectsMarked
-            featureSize = numel(annotation.frame(i).targetIndividual(j).features);
-            missing = 1540 - featureSize;
-            features = padarray(annotation.frame(i).targetIndividual(j).features, [0 missing], 'post');
-            featureSpace.features = [featureSpace.features; features];
-            annotation.frame(i).targetIndividual(j).id;
-            featureSpace.id = [featureSpace.id; annotation.frame(i).targetIndividual(j).id];
-        end
-    end
-    %%
-
-    mdl = fitcknn(featureSpace.features, featureSpace.id,'NumNeighbors', 60,...
-        'NSMethod','exhaustive','Distance','minkowski',...
-        'Standardize',1);
-    save([params.modelLocation, params.modelFileName], 'mdl');
+    % Start Annotation Toolbox
+    annotation = annotate_data_set(params.isVideo, params.datasetLocation, params.fileName, [params.annotationLocation, params.annotationFileName], params.trainingSkip);
+    params.isAnnotated = true;
+    featureSpace = construct_feature_space(annotation);
+    mdl = training_knn(featureSpace, params.numNeighbors, params.searchMethod, params.distanceMetric, params.Standardize, [params.modelLocation, params.modelFileName]);
     params.isTrained = true;
 end
+
 %% Main Routine
 %% Motion Compensation (Orson Lin)
-%folder containing data (a sequence of jpg images)
-dirname = '../data/egtest';
-%dirname = '../data/simpse2';
 %find the images, initialize some variables
 imageNames = dir(fullfile(params.datasetLocation,'*.jpg'));
 imageNames = {imageNames.name}';
@@ -236,11 +173,6 @@ for i=startFrame:nframes
         mo_mask(isnan(mo_mask))=0;
         st = regionprops(logical(mo_mask), 'BoundingBox' );
         hold on 
-%         for k = 1 : length(st)
-%             thisBB = st(k).BoundingBox;
-%             rectangle('Position', [thisBB(1),thisBB(2),thisBB(3),thisBB(4)],...
-%                 'EdgeColor','r','LineWidth',2 )
-%         end
         
 %%      Murat Ambarkutuk
 % Detection and Classification Routine (Murat Ambarkutuk)
