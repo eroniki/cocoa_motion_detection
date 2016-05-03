@@ -1,12 +1,12 @@
-%%% Simple video annotation tool
+%%% Aerial Tracking System 
 %%% Orson Lin, Richard Fedora, Murat Ambarkutuk
 %%% 04/30/2016
 %%% Virginia Tech
 %% Initialization
 clear all; close all; clc;
 %% Variables and parameters
-params.isAnnotated = false;
-params.isTrained = false;
+params.isAnnotated = true;
+params.isTrained = true;
 params.datasetLocation = '../data/DARPA_VIVID/eg_test01/egtest01/';
 params.fileName = '';
 params.modelLocation = '';

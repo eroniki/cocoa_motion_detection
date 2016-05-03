@@ -3,7 +3,7 @@ function mdl = training_knn(featureSpace, numNeighbors, searchMethod, distanceMe
 mdl = fitcknn(featureSpace.features, featureSpace.id,'NumNeighbors', numNeighbors,...
             'NSMethod', searchMethod,'Distance', distanceMetric,...
             'Standardize', standardize)
-if saveLocation ~= ''
+if char(saveLocation, '')
     save(saveLocation, 'mdl');
 end
 end
