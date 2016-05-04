@@ -3,7 +3,7 @@
 %%% 04/30/2016
 %%% Virginia Tech
 %% Initialization
-clear all; close all; clc;
+% clear all; close all; clc;
 %% Variables and parameters
 params.isAnnotated = true;
 params.isTrained = true;
