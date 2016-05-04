@@ -2,10 +2,6 @@ clc;
 
 feature_space = featureSpace.features;
 
-indCar;
-indBack;
-indTruck;
-
 indBack(strcmp(featureSpace.id(:), 'background')) = 1;
 indCar(strcmp(featureSpace.id(:), 'car')) = 1;
 indTruck(strcmp(featureSpace.id(:), 'truck')) = 1;

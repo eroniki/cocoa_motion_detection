@@ -23,28 +23,28 @@ params.distanceMetric = 'minkowski';
 params.Standardize = 1;
 %% Create Path
 addpath(genpath(params.annotationToolLocation));
-%% Training Routine
-% Check if the annotation is completed for the dataset
-if params.isAnnotated == true;
-    % Check if training is completed
-    if params.isTrained == true
-        load([params.modelLocation, params.modelFileName], 'mdl');
-    else
-    % Train it and save
-        load([params.annotationLocation, params.annotationFileName], 'annotation');
-        featureSpace = construct_feature_space(annotation);
-        mdl = training_knn(featureSpace, params.numNeighbors, params.searchMethod, params.distanceMetric, params.Standardize, [params.modelLocation, params.modelFileName]);
-    end
-% Start annotation routine to create the training model    
-elseif params.isAnnotated == false
-    % Start Annotation Toolbox
-    annotation = annotate_data_set(params.isVideo, params.datasetLocation, params.fileName, [params.annotationLocation, params.annotationFileName], params.trainingSkip);
-    annotation = annotate_background(annotation);
-    params.isAnnotated = true;
-    featureSpace = construct_feature_space(annotation);
-    mdl = training_knn(featureSpace, params.numNeighbors, params.searchMethod, params.distanceMetric, params.Standardize, [params.modelLocation, params.modelFileName]);
-    params.isTrained = true;
-end
+% %% Training Routine
+% % Check if the annotation is completed for the dataset
+% if params.isAnnotated == true;
+%     % Check if training is completed
+%     if params.isTrained == true
+%         load([params.modelLocation, params.modelFileName], 'mdl');
+%     else
+%     % Train it and save
+%         load([params.annotationLocation, params.annotationFileName], 'annotation');
+%         featureSpace = construct_feature_space(annotation);
+%         mdl = training_knn(featureSpace, params.numNeighbors, params.searchMethod, params.distanceMetric, params.Standardize, [params.modelLocation, params.modelFileName]);
+%     end
+% % Start annotation routine to create the training model    
+% elseif params.isAnnotated == false
+%     % Start Annotation Toolbox
+%     annotation = annotate_data_set(params.isVideo, params.datasetLocation, params.fileName, [params.annotationLocation, params.annotationFileName], params.trainingSkip);
+%     annotation = annotate_background(annotation);
+%     params.isAnnotated = true;
+%     featureSpace = construct_feature_space(annotation);
+%     mdl = training_knn(featureSpace, params.numNeighbors, params.searchMethod, params.distanceMetric, params.Standardize, [params.modelLocation, params.modelFileName]);
+%     params.isTrained = true;
+% end
 
 %% Main Routine
 %% Motion Compensation (Orson Lin)
@@ -180,6 +180,10 @@ for i=startFrame:nframes
 % TODO: Anaylze the grids for possible objects
 % TODO: Background differencing for the static objects (using homography)
 % TODO: 
+        frame_struct = struct();
+        
+        frame_struct.maskCumulative = zeros(h, w, 'uint8');
+        target_k=1;
         for k = 1 : length(st)
             thisBB = int16(st(k).BoundingBox);
 
@@ -197,9 +201,21 @@ for i=startFrame:nframes
                 missing = 1540 - numel(target(k).features);
                 target(k).features = padarray(target(k).features, [0 missing], 'post');
                 [l, s] = detect_and_classify(mdl, target(k).features)
+                
+                
+                
+                if strcmp(char(l), 'target')
+                    frame_struct.maskCumulative(thisBB(2):thisBB(2)+thisBB(4), thisBB(1):thisBB(1)+thisBB(3)) = 255;
+                    frame_struct.target(target_k).id = 'target';
+                    mask = zeros(h,w,'uint8');
+                    mask(thisBB(2):thisBB(2)+thisBB(4), thisBB(1):thisBB(1)+thisBB(3)) = 255;
+                    frame_struct.target(target_k).targetMask = mask;
+                    target_k = target_k + 1;
+                end
+                
                 figure(666); imshow(roi);
-                pause();
             end
+            
         end
 
        
