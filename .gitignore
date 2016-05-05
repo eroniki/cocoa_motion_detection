@@ -4,6 +4,8 @@
 data/*
 papers/*
 tools/*
+aerial_tracking/image_sequence/*
+
 *.mat
 
 ### Matlab ###
