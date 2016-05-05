@@ -1,6 +1,6 @@
 clear;close all;
 %folder containing data (a sequence of jpg images)
-dirname = '../data/egtest';
+dirname = '../data/DARPA_VIVID/eg_test01/egtest01/';
 %find the images, initialize some variables
 dirlist = dir(sprintf('%s/*.jpg', dirname));
 nframes = numel(dirlist);
@@ -159,7 +159,8 @@ for i=startFrame:nframes
 for k=1:hbb
  thisBB=BB_list_sifted(k,:);
  rectangle('Position', [thisBB(1),thisBB(2),thisBB(3),thisBB(4)],...
-        'EdgeColor','b','LineWidth',2 )
+        'EdgeColor','b','LineWidth',2 );
+ drawnow;
 end
         
  

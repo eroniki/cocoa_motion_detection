@@ -32,7 +32,7 @@ pout = update_step(pout, delta_p);
 end
 end
 % disimilarity=sum(sum((error_img).^2))
- norm_delta_p=norm(delta_p)
+ norm_delta_p=norm(delta_p);
 end
 
 function warp_p = update_step(p, delta_p)

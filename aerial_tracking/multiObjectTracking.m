@@ -1,4 +1,4 @@
-function multiObjectTracking(murat_frame,current_frame)
+function multiObjectTracking(murat_frame,current_frame,M)
 
     global path_circle_size;
     global obj;
@@ -26,6 +26,9 @@ function multiObjectTracking(murat_frame,current_frame)
     createNewTracks(centroids,bboxes,unassignedDetections);
     
     % Add Orson's transformation function to transform paths
+    for iii=1:length(tracks)
+        point_warping(M,tracks(iii).paths(end,1:2));
+    end
 
     displayTrackingResults(current_frame,mask);
 end
