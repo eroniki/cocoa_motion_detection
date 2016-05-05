@@ -1,72 +1,32 @@
-function [ mask_updated, ind,killed ] = divider2(img,gs,percent,ind_a,killed_his)
-%The function divides input image into grid and calculate the 
-%error sum within grids.
-[h,w]=size(img);
-pad.y=ceil(h/gs.y);
-pad.y=pad.y*gs.y-h;
-pad.x=ceil(w/gs.x);
-pad.x=pad.x*gs.x-w;
+function [ mask_updated, ind,killed_his, grid_his] = divider2(img,gs,percent,ind_a,killed_his, ind_init, grid_his,uti)
+h=uti.imsize_before_pad(1);
+w=uti.imsize_before_pad(2);
 %pad the matrix with zeros
-img(h+1:h+pad.y,:)=0;
-img(:,w+1:w+pad.x)=0;
+img(h+1:h+uti.pad_y,:)=0;
+img(:,w+1:w+uti.pad_x)=0;
+h2=uti.imsize_after_pad(1);
+w2=uti.imsize_after_pad(2);
 
-[h2,w2]=size(img);
 quo.y=floor(h2/gs.y);
 quo.x=floor(w2/gs.x);
-grid_d.y=gs.y*ones(1,quo.y);
-grid_d.x=gs.x*ones(1,quo.x);
-C = mat2cell(img, grid_d.y,grid_d.x);
+C = mat2cell(img, uti.mat2cell_y,uti.mat2cell_x);
 %calculate subsum of grids
 imgsubsum=cellfun(@divider_helper,C);
-imgsubsum_s=imgsubsum;
-%For better visualization in the future. "mesh" seems necessary 
-error_surface=zeros(h2,w2);
- X=1:1:w2;
-% Y=1:1:h2;
-%X=w2:-1:1;
-Y=h2:-1:1;
-[X,Y]=meshgrid(X,Y);
+%record grid history
+grid_his=[grid_his,imgsubsum(ind_init)];
+
+subsum_size=size(imgsubsum);
 n=1:numel(imgsubsum);
-[I,J] = ind2sub(size(imgsubsum),n);
 imgsubsum=imgsubsum(:);
-
-for i=n
-   ind.y=I(i);
-   ind.x=J(i);
-   error_surface(1+((ind.y-1)*gs.y):ind.y*gs.y,1+((ind.x-1)*gs.x):ind.x*gs.x)=imgsubsum(i);  
-end
-figure(88); clf;
-mesh(X,Y,error_surface);
-% 
-% [~,max_diff]=max(imgsubsum(:,1));
-
-
 imgsubsum=[imgsubsum,n'];
-
-
-
-% for i=1:numel(killed_his)
-%     A=find(imgsubsum(:,2)==killed_his(i));
-%     imgsubsum(A,:)=[];    
-% end
-
-
+%prevent the function from deleting sames grid over and over again
 imgsubsum(killed_his,:)=[];
-
-
 imgsubsum = sortrows(imgsubsum);
 
-
-
-
-ceil(n(end)*(1-(percent/100)))
-%removed_grid=imgsubsum(end-ceil(n(end)*(1-(percent/100))):end,2);
-
-%further refine the removed_grid
 removed_grid=imgsubsum(end-ceil(n(end)*(1-(percent/100))):end,:);
 max_diff=max(removed_grid(:,1));
-if max_diff>=10^(-3)
 
+if max_diff>=10^(-3)
 
 idx=numel(removed_grid)/2; 
 removed_grid2=removed_grid;
@@ -84,7 +44,7 @@ end
 
 killed = intersect(ind_a,removed_grid2);
 C = setdiff(ind_a,removed_grid2);
-[I,J] = ind2sub(size(imgsubsum_s),C);
+[I,J] = ind2sub(subsum_size,C);
 mask_updated=NaN(h2,w2);
 for i=1:numel(I)
    ind.y=I(i);
@@ -92,18 +52,10 @@ for i=1:numel(I)
    mask_updated(1+((ind.y-1)*gs.y):ind.y*gs.y,1+((ind.x-1)*gs.x):ind.x*gs.x)=1; 
 end
 
-
-
-
-
-
-
-
 %Get rid of the paved pixels
 mask_updated(h+1:end,:)=[];
 mask_updated(:,w+1:end)=[];
-% figure(89); clf;
-% imshow(mask_updated);
+% record the surviving grid
 ind=C;
-
+killed_his=[killed_his;killed];
 end
