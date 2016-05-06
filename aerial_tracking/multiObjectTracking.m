@@ -1,10 +1,9 @@
-function multiObjectTracking(murat_frame,current_frame,M,imageName,img)
+function multiObjectTracking(murat_frame,current_frame,M)
 
     global path_circle_size;
     global obj;
     global tracks;
     global nextId;
-    global mean_shift_kf_tag;
 
     % path_circle_size = 5;
     % obj = setupSystemObjects();
@@ -19,7 +18,7 @@ function multiObjectTracking(murat_frame,current_frame,M,imageName,img)
     [centroids, bboxes, mask] = detectObjects(murat_frame.maskCumulative);
     predictNewLocationsOfTracks();
     [assignments, unassignedTracks, unassignedDetections] = ...
-        detectionToTrackAssignment(centroids,img);
+        detectionToTrackAssignment(centroids);
 
     updateAssignedTracks(centroids,bboxes,assignments);
     updateUnassignedTracks(unassignedTracks);
@@ -31,5 +30,5 @@ function multiObjectTracking(murat_frame,current_frame,M,imageName,img)
         point_warping(M,tracks(iii).paths(end,1:2));
     end
 
-    displayTrackingResults(current_frame,mask,imageName);
+    displayTrackingResults(current_frame,mask);
 end

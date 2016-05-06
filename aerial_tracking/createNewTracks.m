@@ -14,8 +14,7 @@ function createNewTracks(centroids,bboxes,unassignedDetections)
 
         % Create a Kalman filter object.
         kalmanFilter = configureKalmanFilter('ConstantVelocity', ...
-            centroid, [20, 5], [10, 2.5], 10); %             centroid, [200, 50], [100, 25], 100);
-
+            centroid, [200, 50], [100, 25], 100);
 
         % Create a new track.
         newTrack = struct(...
