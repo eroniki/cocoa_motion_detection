@@ -71,11 +71,11 @@ global obj;
 global tracks;
 global nextId;
 global mean_shift_kf_tag;
-path_circle_size = 1;
+path_circle_size = 3;
 obj = setupSystemObjects();
 tracks = initializeTracks(); % Create an empty array of tracks.
 nextId = 1; % ID of the next 
-mean_shift_kf_tag = 'mean_shift';
+mean_shift_kf_tag = 'kf';
 %% Create Path
 addpath(genpath(params.annotationToolLocation));
 
