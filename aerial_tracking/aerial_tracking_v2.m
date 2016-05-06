@@ -29,10 +29,10 @@ params.previous_frame=[];
 %set parameters for grid devider 
 params.gs.x=16;
 params.gs.y=16;
-params.thresh=4;
+params.thresh=3;
 params.percent=98;
 params.grid_sifting_time=3;
-params.startFrame = 600;
+params.startFrame = 1;
 params.skipFrames = 1;
 
 params.imageNames = dir(fullfile(params.datasetLocation,'*.jpg'));
@@ -40,8 +40,7 @@ params.imageNames = {params.imageNames.name}';
 params.nFrames = numel(params.imageNames);
 
 
-current_frame=[];
-previous_frame=[];
+params.MGlobal = eye(3,3);
 %image related initialization
 img = imread([params.datasetLocation, params.imageNames{1}]);
 if (ndims(img) == 3)
@@ -59,8 +58,10 @@ params.fov_size=[params.yt2-params.yt1+1,params.xt2-params.xt1+1];
 params.fov_vec.y=params.yt1:params.yt2;
 params.fov_vec.x=params.xt1:params.xt2;
 params.templateBox = [params.xt1 params.xt1 params.xt2 params.xt2 params.xt1;params.yt1 params.yt2 params.yt2 params.yt1 params.yt1];
+params.globalFrame = [];
 %setting parameters for grids
 [params.uti]= initilizer(params.fov_size,params.gs);
+params.MGlobal = affine2d(eye(3));
 %feature point flag
 %params.wparams.hetparams.her to do feature point detection or not.
 feat_flag1=1;
@@ -78,8 +79,8 @@ nextId = 1; % ID of the next track
 addpath(genpath(params.annotationToolLocation));
 
 %% Initialize Models
-[mdl_target_background, mdl_car_truck] = initialize_models(params);
-
+% [mdl_target_background, mdl_car_truck] = initialize_models(params);
+load('matlab.mat');
 %% Main Routine
 for i=params.startFrame:params.skipFrames:params.nFrames
 %%     Orson Lin
@@ -87,18 +88,25 @@ for i=params.startFrame:params.skipFrames:params.nFrames
     if (ndims(img) == 3)
         img = rgb2gray(img);
     end  
-    img = double(img) / 255;       
+    img = double(img) / 255; 
     %% inialization
     params.current_frame=img;
+    
     if ~isempty(params.previous_frame)      
         [boundingBox, M, warped_current] = motion_compensation(params.current_frame, params.previous_frame, params);
-%%     Murat Ambarkutuk
+        
+        [params.globalFrame, params.MGlobal] = constructGlobalMap(params.globalFrame, img, M, params.MGlobal);
+        %%     Murat Ambarkutuk
         [frame_struct] = classification(boundingBox, mdl_target_background, mdl_car_truck, params, false); 
-%%     Richard Fedora
+        %%     Richard Fedora
         multiObjectTracking(frame_struct, warped_current, M);
-
+    else
+        params.globalFrame = img;
     end
     
+    
+    figure(666);
+    imshow(params.globalFrame);
     fprintf('ping_passed\n');
     params.previous_frame= params.current_frame;     
 end
