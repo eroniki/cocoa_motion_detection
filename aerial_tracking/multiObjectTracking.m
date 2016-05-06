@@ -28,7 +28,7 @@ function multiObjectTracking(murat_frame,current_frame,M,imageName,img)
     
     % Add Orson's transformation function to transform paths
     for iii=1:length(tracks)
-        point_warping(M,tracks(iii).paths(end,1:2));
+        tracks(iii).paths(:,1:2) = point_warping(M,tracks(iii).paths(:,1:2));
     end
 
     displayTrackingResults(current_frame,mask,imageName);
