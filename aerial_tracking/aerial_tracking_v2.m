@@ -102,7 +102,7 @@ for i=params.startFrame:params.skipFrames:params.nFrames
         %%     Murat Ambarkutuk
         [frame_struct] = classification(boundingBox, mdl_target_background, mdl_car_truck, params, false); 
         %%     Richard Fedora
-        multiObjectTracking(frame_struct, warped_current, M, cellstr(params.imageName{i}), img_rgb);
+        multiObjectTracking(frame_struct, warped_current, M, cellstr(params.imageNames{i}), img_rgb);
     else
         params.globalFrame = img;
     end
