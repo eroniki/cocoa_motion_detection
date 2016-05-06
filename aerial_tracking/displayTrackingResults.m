@@ -67,15 +67,15 @@ function displayTrackingResults(current_frame,mask,imageName)
         J = step(shapeInserter, frame, paths);
         imshow(J); 
         drawnow;
-     %   im_name = ['D:\repo\Coursework\advanced_computer_vision\project\code\image_sequence\' char(imageName{1,1})];
-     %   imwrite(J,im_name);
+%         im_name = ['D:\repo\Coursework\advanced_computer_vision\project\code\image_sequence\' char(imageName{1,1})];
+%         imwrite(J,im_name);
     else
 %         figure(35);
 %         imshow(mask);
         figure(36);
         imshow(frame);
-   %     im_name = ['D:\repo\Coursework\advanced_computer_vision\project\code\image_sequence\' char(imageName{1,1})];
-    %    imwrite(frame,im_name);
+%         im_name = ['D:\repo\Coursework\advanced_computer_vision\project\code\image_sequence\' char(imageName{1,1})];
+%         imwrite(frame,im_name);
         %hold on;
     end
 % %   figure(35);
