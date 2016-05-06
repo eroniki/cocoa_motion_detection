@@ -1,4 +1,4 @@
-function displayTrackingResults(current_frame,mask)
+function displayTrackingResults(current_frame,mask,imageName)
 
     global obj;
     global tracks;
@@ -64,5 +64,7 @@ function displayTrackingResults(current_frame,mask)
         figure(36);
         imshow(frame);
         drawnow;
+        im_name = ['D:\repo\Coursework\advanced_computer_vision\project\code\image_sequence\' char(imageName{1,1})];
+        imwrite(frame,im_name);
         hold on;
 end

@@ -7,6 +7,7 @@ tools/*
 aerial_tracking/image_sequence/*
 
 *.mat
+*.jpg
 
 ### Matlab ###
 ##---------------------------------------------------
