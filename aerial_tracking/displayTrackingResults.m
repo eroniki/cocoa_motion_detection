@@ -1,4 +1,4 @@
-function displayTrackingResults(current_frame,mask)
+function displayTrackingResults(current_frame,mask,imageName)
 
     global obj;
     global tracks;
@@ -44,25 +44,45 @@ function displayTrackingResults(current_frame,mask)
             labels = strcat(labels, isPredicted);
 
             % Draw the objects on the frame.
-            frame = insertObjectAnnotation(frame, 'rectangle', ...
-                bboxes, labels);
+%             frame = insertObjectAnnotation(frame, 'rectangle', ...
+%                 bboxes, labels);
 
-            frame = insertObjectAnnotation(frame, 'circle', ...
-                paths, c_labels);
-
-            % Draw the objects on the mask.
-            mask = insertObjectAnnotation(mask, 'rectangle', ...
-                bboxes, labels);
+%             frame = insertObjectAnnotation(frame, 'circle', ...
+%                 paths, c_labels);
+% 
+%             Draw the objects on the mask.
+%             mask = insertObjectAnnotation(mask, 'rectangle', ...
+%                 bboxes, labels);
         end
     end
 
     % Display the mask and the frame.
 %     obj.maskPlayer.step(mask);
 %     obj.videoPlayer.step(frame);
-        figure(35);
-        imshow(mask);
+    paths = cat(1, reliableTracks.paths);
+    if (~isempty(paths))
+        shapeInserter = vision.ShapeInserter('Shape','Circles');
+        %paths = [paths(:,1)' paths(:,2)'];
+        paths = int32(paths);
+        J = step(shapeInserter, frame, paths);
+        imshow(J); 
+        drawnow;
+        im_name = ['D:\repo\Coursework\advanced_computer_vision\project\code\image_sequence\' char(imageName{1,1})];
+        imwrite(J,im_name);
+    else
+%         figure(35);
+%         imshow(mask);
         figure(36);
         imshow(frame);
-        drawnow;
-        hold on;
+        im_name = ['D:\repo\Coursework\advanced_computer_vision\project\code\image_sequence\' char(imageName{1,1})];
+        imwrite(frame,im_name);
+        %hold on;
+    end
+% %   figure(35);
+% %   imshow(mask);
+%     figure(36);
+%     imshow(frame);
+%     im_name = ['D:\repo\Coursework\advanced_computer_vision\project\code\image_sequence\' char(imageName{1,1})];
+%     imwrite(frame,im_name);
+%     %hold on;
 end

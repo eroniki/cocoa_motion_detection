@@ -48,7 +48,7 @@ function [ st, M, warped_current ] = motion_compensation(current_frame, previous
 mo_mask(params.fov_vec.y, params.fov_vec.x)=mask_constructed;
 %%
 figure(92);
-imshow(mo_mask.*current_frame); hold on;
+imshow(mo_mask.*current_frame)
 mo_mask(isnan(mo_mask))=0;
 st = regionprops(logical(mo_mask), 'BoundingBox' );
 [ BB_list_sifted,center_list ] = box_center_find( st,params.gs );     
